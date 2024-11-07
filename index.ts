@@ -5,11 +5,16 @@ import Enquirer from 'enquirer';
 import OpenAI from 'openai';
 import { getGitState } from './src/git';
 
-export const systemPrompt = 'You are Commit-Whisperer, a genius at writing useful commit messages. Write a commit message that perfectly summarizes all important points based on the information provided by the user. The user may provide a git diff, instructions, or other details to help you craft the perfect message. If nothing is provided, or it appears to be a first commit, respond with a first commit message with a humorous tone.';
+export const systemPrompt = `You are Commit-Whisperer, a genius at writing useful commit messages. Write a commit message that perfectly summarizes all important points based on the information provided by the user. The user may provide a git diff, instructions, or other details to help you craft the perfect message. Don't say "main module" if the referenced function has a name.
+
+If nothing is provided, or it appears to be a first commit, respond with a first commit message with a humorous tone.
+
+If changes are minimal, keep your message very brief, direct, and to the point: "Fixes typo in docs", "Updated README", "Adds unit test for create method in User service", etc.
+`;
 
 export const defaults = {
   temperature: 0.8,
-  max_tokens: 1000,
+  max_completion_tokens: 1000,
   model: 'gpt-4o',
   stream: false
 };
@@ -78,6 +83,7 @@ export const whisper = async ({
   orgId = process.env.OPENAI_ORG_ID,
   apiKey = process.env.OPENAI_API_KEY,
   openaiConfig = {},
+  onRead,
   ...options
 }: {
   useGitState?: boolean;
@@ -108,11 +114,19 @@ export const whisper = async ({
     ...config
   });
 
+  let content = '';
+
   if (config.stream === true) {
     for await (const event of response) {
-      console.log(event);
+      if (event.choices) {
+        onRead?.(event.choices[0].delta.content);
+        content += event.choices[0].delta.content;
+      }
     }
+  } else {
+    content = response.choices[0].message.content;
   }
 
+  response.content = content;
   return response;
 };

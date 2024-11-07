@@ -15,6 +15,7 @@ const argv = minimist(process.argv.slice(2), {
   },
   default: {
     model: 'gpt-4o',
+    max_tokens: 1000,
     temperature: 0.8,
     stream: true,
     debug: false
@@ -26,6 +27,7 @@ if (argv.h || argv.help) {
     Usage: ai [options] [text]
 
     Options:
+      -M, --max-tokens  Max tokens (default: 1000)
       -m, --model       Model to use (default: gpt-4)
       -t, --temperature Temperature (default: 0.9)
       -p, --preset      Preset to use
@@ -42,12 +44,21 @@ if (argv._.length === 0) {
 
 whisper({
   messages: [{ role: 'user', content: argv._.join(' ') }],
-  ...argv,
-  onRead: (message: string) => process.stdout.write(message),
+  openaiConfig: {
+    model: argv.model,
+    max_completion_tokens: argv.max_tokens,
+    temperature: argv.temperature,
+    stream: argv.stream
+  },
+  onRead: (content: string) => content && process.stdout.write(content),
   onFinish: () => console.log()
 })
   .then(response => {
-    console.log(response.choices[0].message.content);
+    if (!argv.stream) {
+      console.log(response.content);
+    } else {
+      console.log();
+    }
 
     if (argv.debug) {
       console.log(`\n${Date.now() - start}ms`);
