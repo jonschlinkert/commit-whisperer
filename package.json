@@ -1,0 +1,71 @@
+{
+  "name": "commit-whisperer",
+  "description": "An AI genius for generating meaningful git commit messages from repository state and user instructions.",
+  "version": "0.0.1",
+  "repository": "jonschlinkert/commit-whisperer",
+  "homepage": "https://github.com/jonschlinkert/commit-whisperer",
+  "author": "Jon Schlinkert (https://github.com/jonschlinkert)",
+  "bugs": {
+    "url": "https://github.com/jonschlinkert/commit-whisperer/issues"
+  },
+  "bin": {
+    "commit-whisperer": "dist/bin/cli.js",
+    "cw": "dist/bin/cli.js"
+  },
+  "scripts": {
+    "eslint": "npx eslint --ext .ts .",
+    "test": "ts-mocha -r esbuild-register 'test/**/*.ts'",
+    "tsup": "npx tsup && pnpm link --global"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "enquirer": "^2.4.1",
+    "minimist": "^1.2.8",
+    "openai": "^4.47.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.12.7",
+    "@typescript-eslint/eslint-plugin": "^7.7.1",
+    "@typescript-eslint/parser": "^7.7.1",
+    "esbuild-register": "^3.5.0",
+    "eslint": "^8.57.0",
+    "gulp-format-md": "^2.0.0",
+    "ts-mocha": "^10.0.0",
+    "ts-node": "^10.9.2",
+    "tsconfig-paths": "^4.2.0",
+    "tsup": "^8.0.2",
+    "typescript": "^5.4.5"
+  },
+  "keywords": [
+    "ai",
+    "commit",
+    "commitizen",
+    "commitlint",
+    "conventional-changelog",
+    "git",
+    "semantic-release",
+    "changelog",
+    "semantic",
+    "release",
+    "tag",
+    "version",
+    "versioning",
+    "commit message"
+  ],
+  "verb": {
+    "toc": false,
+    "layout": "default",
+    "tasks": [
+      "readme"
+    ],
+    "plugins": [
+      "gulp-format-md"
+    ],
+    "reflinks": [
+      "verb"
+    ],
+    "lint": {
+      "reflinks": true
+    }
+  }
+}
