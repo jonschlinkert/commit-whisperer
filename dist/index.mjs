@@ -1,7 +1,7 @@
 var __defProp = Object.defineProperty;
 var __name = (target, value) => __defProp(target, "name", { value, configurable: true });
 
-// index.ts
+// src/whisper.ts
 import "dotenv/config";
 import fs from "node:fs";
 import path from "node:path";
@@ -23,11 +23,16 @@ var getGitState = /* @__PURE__ */ __name((cwd = process.cwd()) => {
   }
 }, "getGitState");
 
-// index.ts
-var systemPrompt = "You are Commit-Whisperer, a genius at writing useful commit messages. Write a commit message that perfectly summarizes all important points based on the information provided by the user. The user may provide a git diff, instructions, or other details to help you craft the perfect message. If nothing is provided, or it appears to be a first commit, respond with a first commit message with a humorous tone.";
+// src/whisper.ts
+var systemPrompt = `You are Commit-Whisperer, a genius at writing useful commit messages. Write a commit message that perfectly summarizes all important points based on the information provided by the user. The user may provide a git diff, instructions, or other details to help you craft the perfect message. Don't say "main module" if the referenced function has a name.
+
+If nothing is provided, or it appears to be a first commit, respond with a first commit message with a humorous tone.
+
+If changes are minimal, keep your message very brief, direct, and to the point: "Fixes typo in docs", "Updated README", "Adds unit test for create method in User service", etc.
+`;
 var defaults = {
   temperature: 0.8,
-  max_tokens: 1e3,
+  max_completion_tokens: 1e3,
   model: "gpt-4o",
   stream: false
 };
@@ -45,7 +50,7 @@ var getPromptMessage = /* @__PURE__ */ __name(async (optionsMessage) => {
 }, "getPromptMessage");
 var formatContent = /* @__PURE__ */ __name(({
   gitState,
-  includeGitDiff,
+  diff,
   message,
   pkg
 }) => {
@@ -65,7 +70,7 @@ var formatContent = /* @__PURE__ */ __name(({
     lines.push(`**Git status**:
 ${gitState.status}`);
     lines.push("");
-    if (includeGitDiff) {
+    if (diff) {
       lines.push(`**Git diff**:
 ${gitState.diff}`);
       lines.push("");
@@ -79,10 +84,11 @@ var whisper = /* @__PURE__ */ __name(async ({
   usePackageJson = true,
   message: optionsMessage,
   instructions,
-  includeGitDiff = false,
+  diff = false,
   orgId = process.env.OPENAI_ORG_ID,
   apiKey = process.env.OPENAI_API_KEY,
   openaiConfig = {},
+  onRead,
   ...options
 } = {}) => {
   const message = await getPromptMessage(optionsMessage);
@@ -98,10 +104,22 @@ var whisper = /* @__PURE__ */ __name(async ({
   const response = await openai.chat.completions.create({
     messages: [
       { role: "system", content: instructions || systemPrompt },
-      { role: "user", content: format({ gitState, message, pkg, includeGitDiff }) }
+      { role: "user", content: format({ gitState, message, pkg, diff }) }
     ],
     ...config
   });
+  let content = "";
+  if (config.stream === true) {
+    for await (const event of response) {
+      if (event.choices) {
+        onRead?.(event.choices[0].delta.content);
+        content += event.choices[0].delta.content;
+      }
+    }
+  } else {
+    content = response.choices[0].message.content;
+  }
+  response.content = content;
   return response;
 }, "whisper");
 export {

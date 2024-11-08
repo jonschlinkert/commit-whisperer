@@ -1,7 +1,7 @@
 {
   "name": "commit-whisperer",
   "description": "An AI genius for generating meaningful git commit messages from repository state and user instructions.",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "repository": "jonschlinkert/commit-whisperer",
   "homepage": "https://github.com/jonschlinkert/commit-whisperer",
   "author": "Jon Schlinkert (https://github.com/jonschlinkert)",
