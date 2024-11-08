@@ -4,6 +4,9 @@
 
 Please consider following this project's author, [Jon Schlinkert](https://github.com/jonschlinkert), and consider starring the project to show your :heart: and support.
 
+https://github.com/user-attachments/assets/cc99ce5b-3e6b-4fc1-afb4-35629f7f9cc7
+
+
 ## Install
 
 Install with [npm](https://www.npmjs.com/):
